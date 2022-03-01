@@ -42,4 +42,9 @@ app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL; //Had to declare this variable to call it below. Otherwise I could not get any information.
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[shortURL] };
   res.render("urls_show", templateVars);
-}); //route for new template
+}); 
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
