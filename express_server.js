@@ -87,6 +87,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 }); 
-//Deletes :shortURL in database and reidrects to the urls page.
+//Deletes :shortURL in database and redirects to the urls page.
 
-
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  urlDatabase[shortURL] = req.body.newURL;
+  res.redirect('/urls');
+});
+//Updates a URL resource POST /urls/:id
