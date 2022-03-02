@@ -64,8 +64,15 @@ app.get("/urls/:shortURL", (req, res) => {
 }); 
 
 app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString() //We'll use this constant no only below but also in the redirect
+  urlDatabase[shortURL] = req.body.longURL; //Adds the short and long urls to the variable "urlDatabase"
+  //res.send("Ok");
+  
   console.log(req.body);  // Log the POST request body to the console
-  urlDatabase[generateRandomString()] = req.body.longURL; //Adds the short and long urls to the variable "urlDatabase"
-  res.send("Ok"); 
-  console.log(urlDatabase);       
+  
+  res.redirect(`/urls/${shortURL}`); //Redirects to /urls/:shortURL, where shortURL is the random string we generated
+   
+
+  //console.log(urlDatabase);       
 });
+
