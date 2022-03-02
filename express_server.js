@@ -63,6 +63,13 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 }); 
 
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL]; 
+  //console.log("------->", longURL);
+  res.redirect(longURL);
+}); 
+//Requests to the endpoint "/u/:shortURL" will redirect to its longURL
+
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString() //We'll use this constant no only below but also in the redirect
   urlDatabase[shortURL] = req.body.longURL; //Adds the short and long urls to the variable "urlDatabase"
@@ -71,8 +78,9 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   
   res.redirect(`/urls/${shortURL}`); //Redirects to /urls/:shortURL, where shortURL is the random string we generated
-   
-
+  //Note that this won't work if we only require de site without http:// 
   //console.log(urlDatabase);       
 });
+
+
 
