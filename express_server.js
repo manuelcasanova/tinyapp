@@ -19,11 +19,11 @@ function generateRandomString() {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const length = 6;
   for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length))
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
     //Math.random --> 0...1  times (length of characters) charAt --> gets the character of the string
   }
   return result;
-};
+}
 
 app.set("view engine", "ejs");
 
@@ -71,32 +71,32 @@ app.get("/urls/:shortURL", (req, res) => {
     username: req.cookies["username"],
   };
   res.render("urls_show", templateVars);
-}); 
+});
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]; 
+  const longURL = urlDatabase[req.params.shortURL];
   //console.log("------->", longURL);
   res.redirect(longURL);
-}); 
+});
 //Requests to the endpoint "/u/:shortURL" will redirect to its longURL
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString() //We'll use this constant no only below but also in the redirect
+  const shortURL = generateRandomString(); //We'll use this constant no only below but also in the redirect
   urlDatabase[shortURL] = req.body.longURL; //Adds the short and long urls to the variable "urlDatabase"
   //res.send("Ok");
   
   console.log(req.body);  // Log the POST request body to the console
   
   res.redirect(`/urls/${shortURL}`); //Redirects to /urls/:shortURL, where shortURL is the random string we generated
-  //Note that this won't work if we only require de site without http:// 
-  //console.log(urlDatabase);       
+  //Note that this won't work if we only require de site without http://
+  //console.log(urlDatabase);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL; 
+  const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
-}); 
+});
 //Deletes :shortURL in database and redirects to the urls page.
 
 app.post("/urls/:id", (req, res) => {
@@ -109,12 +109,11 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const input = req.body.username;
   res.cookie("username", input); //Cookies have name/value
-  console.log(req.cookies);
   res.redirect('/urls');
 });
 //Sets a cookie named username to the value submitted in the request body via the login form. Then redirects to /urls page.
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username"); 
+  res.clearCookie("username");
   res.redirect('/urls');
 });
