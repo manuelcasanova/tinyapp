@@ -107,8 +107,14 @@ app.post("/urls/:id", (req, res) => {
 //Updates a URL resource POST /urls/:id
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie(username);
+  const input = req.body.username;
+  res.cookie("username", input); //Cookies have name/value
+  console.log(req.cookies);
   res.redirect('/urls');
 });
 //Sets a cookie named username to the value submitted in the request body via the login form. Then redirects to /urls page.
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("username"); 
+  res.redirect('/urls');
+});
