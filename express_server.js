@@ -96,5 +96,8 @@ app.post("/urls/:id", (req, res) => {
 });
 //Updates a URL resource POST /urls/:id
 
-
-//Test3 to see if updates MAIN or BRANCH
+app.post("/urls/login", (req, res) => {
+  res.cookie(username);
+  res.redirect('/urls');
+});
+//Sets a cookie named username to the value submitted in the request body via the login form. Then redirects to /urls page.
