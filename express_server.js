@@ -1,10 +1,11 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const cookieParser = require("cookie-parser");
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-
+app.use(cookieParser());
 
 // function generateRandomString(length) {
 //   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -96,7 +97,8 @@ app.post("/urls/:id", (req, res) => {
 });
 //Updates a URL resource POST /urls/:id
 
-app.post("/urls/login", (req, res) => {
+app.post("/login", (req, res) => {
+  const username = req.body.username;
   res.cookie(username);
   res.redirect('/urls');
 });
