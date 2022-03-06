@@ -25,6 +25,15 @@ function generateRandomString() {
   return result;
 }
 
+function emailRepeated(email) {
+  for (const user in users) {
+    if (users[user].email === email) {
+      return users[user].id
+    }
+  }
+  return false
+} 
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -140,27 +149,42 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const newUserID = generateRandomString();
-
-if (email === "" || password === "") {
-  res.send(400, "Fields email and password cannot be empty")
-} //email or password empty --> error
-else {
-  for (const user in users) {
-    if (users[user].email === email) {
-        res.send(400, "This email has already been used to create an account")   //email already exists --> error 
-    }
-    {
-      users[newUserID] = {
-        id: newUserID,
-        email: email,
-        password: password
-      };
-  }
-} 
-}
-  //console.log(users); //To confirm that new users have been added
-  res.cookie("userID", newUserID);
-  res.redirect(`/urls/`);
+  if (!email || !password) {
+    res.send(400, "Fields email and password cannot be empty");
+  } else if (emailRepeated(email)) {
+    res.send(400, "This email has already been used to create an account");
+  } else {
+    const newUserID = generateRandomString();
+    users[newUserID] = {
+      id: newUserID,
+      email: email,
+      password: password
+    };
+      res.cookie('userID', newUserID);
+      res.redirect("/urls");
+  };
 });
+
+// app.post("/register", (req, res) => {
+//   const email = req.body.email;
+//   const password = req.body.password;
+//   const newUserID = generateRandomString();
+
+//   if (email === "" || password === "") {
+//     res.send(400, "Fields email and password cannot be empty")
+//   } //email or password empty --> error
+//   else if (emailRepeated(email)) {
+//       res.send(400, "This email has already been used to create an account")   //email already exists --> error 
+//   } else {
+//     users[newUserID] = {
+//       id: newUserID,
+//       email: email,
+//       password: password
+//     };
+//   }
+
+//   //console.log(users); //To confirm that new users have been added
+//   res.cookie("userID", newUserID);
+//   res.redirect(`/urls/`);
+// });
 
