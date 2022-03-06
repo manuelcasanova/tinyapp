@@ -32,6 +32,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  "userID": {
+    id: "userID",
+    email: "user@example.com",
+    password: "password1"
+  },
+  "user2ID": {
+    id: "user2ID",
+    email: "user2@example.com",
+    password: "password2"
+  }
+}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -123,5 +135,18 @@ app.get("/register", (req, res) => {
     username: req.cookies["username"],
   };
   res.render("register", templateVars)
+});
+
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const newUserID = generateRandomString();
+  users[newUserID] = {
+    id: newUserID,
+    email: email,
+    password: password
+  };
+  //console.log(users); To confirm that new users have been added
+  res.redirect(`/urls/`); 
 });
 
