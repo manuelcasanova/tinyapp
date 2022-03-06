@@ -149,10 +149,10 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  if (!email || !password) {
-    res.send(400, "Fields email and password cannot be empty");
+  if (email === " " || password === " ") { //if !email || !password
+    res.status(400).send("Fields email and password cannot be empty");
   } else if (emailRepeated(email)) {
-    res.send(400, "This email has already been used to create an account");
+    res.status(400).send("This email has already been used to create an account");
   } else {
     const newUserID = generateRandomString();
     users[newUserID] = {
