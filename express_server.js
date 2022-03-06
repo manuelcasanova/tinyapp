@@ -147,6 +147,7 @@ app.post("/register", (req, res) => {
     password: password
   };
   //console.log(users); To confirm that new users have been added
+  res.cookie("userID", newUserID);
   res.redirect(`/urls/`); 
 });
 
