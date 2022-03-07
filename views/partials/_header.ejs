@@ -18,9 +18,11 @@
         </div>
       </form>
     <% } else{ %>
-    <form method="POST" action="/login" class="form-inline">
-      <input class="form-control" type="text" name="username" placeholder="Username" style="width: 200px; margin: 1em">
+    <form method="GET" action="/login" class="form-inline">
       <button type="submit" style="background-color:transparent; border-color:rgb(4, 48, 48); color:darkslategray" class="btn btn-primary">Login</button>
+    </form>
+    <form method="GET" action="/register" class="form-inline">
+      <button type="submit" style="background-color:transparent; border-color:rgb(4, 48, 48); color:darkslategray; margin-left: 10px" class="btn btn-primary">Register</button>
     </form>
     <% } %>
   </nav>
