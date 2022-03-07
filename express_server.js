@@ -74,8 +74,27 @@ app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: users[req.cookies["userID"]]
   };
-  res.render("urls_new", templateVars);
+  if (!req.cookies["userID"]) { //If there's no logged in user
+    res.redirect("/login"); //redirect to login page
+  } else {
+    res.render("urls_new", templateVars);
+  }
 });
+
+/* //Trying: Only registered users can shorten urls
+app.get("/urls/new", (req, res) => {
+  for (const user in users) {
+    if (user) {
+      let templateVars = {
+        user: users[req.cookies["userID"]]
+      };
+      res.render("urls_new", templateVars);
+    } else {
+      res.redirect(`/login`);
+    }
+  }
+});
+*/
 
 app.get("/urls", (req, res) => {
   let templateVars = {
