@@ -128,11 +128,23 @@ app.post("/urls/:id", (req, res) => {
 //Updates a URL resource POST /urls/:id
 
 app.post("/login", (req, res) => {
-  const input = req.body.username;
-  res.cookie("username", input); //Cookies have name/value
-  res.redirect('/urls');
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if(!emailRepeated(email)) {
+    res.status(403).send("This is not a valid email address")
+  } else {
+    const userID = emailRepeated(email);
+    if (users[userID].password !== password) { //to access the password of each user in the object I can reuse the function emailRepeated(email)
+      res.status(403).send("Wrong password")
+    } else {
+      res.cookie('userID', userID);
+      res.redirect("/urls");
+    }
+  }
+  
 });
-//Sets a cookie named username to the value submitted in the request body via the login form. Then redirects to /urls page.
+
 
 app.post("/logout", (req, res) => {
   res.clearCookie("userID");
