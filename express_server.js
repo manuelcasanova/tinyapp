@@ -113,14 +113,14 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL, /*--------------HERE----------*/
     user: users[req.cookies["userID"]]
   };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL; /*--------------HERE----------*/
   //console.log("------->", longURL);
   res.redirect(longURL);
 });
@@ -128,10 +128,15 @@ app.get("/u/:shortURL", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); //We'll use this constant no only below but also in the redirect
-  urlDatabase[shortURL] = req.body.longURL; //Adds the short and long urls to the variable "urlDatabase"
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["userID"] //Modified so it now adds to the object the userID connected to the new shortURL created
+  }
+    
+    ; //Adds the short and long urls to the variable "urlDatabase"
   //res.send("Ok");
   
-  console.log(req.body);  // Log the POST request body to the console
+  console.log(urlDatabase);  // Log the POST request body to the console
   
   res.redirect(`/urls/${shortURL}`); //Redirects to /urls/:shortURL, where shortURL is the random string we generated
   //Note that this won't work if we only require de site without http://
@@ -140,14 +145,14 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
+  delete urlDatabase[shortURL];    
   res.redirect("/urls");
 });
 //Deletes :shortURL in database and redirects to the urls page.
 
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.newURL;
+  urlDatabase[shortURL].longURL = req.body.newURL; //Changed left side so it could access de longURL. When I was editing a shortUrl the new longURL wouldn't show until I did this!
   res.redirect('/urls');
 });
 //Updates a URL resource POST /urls/:id
