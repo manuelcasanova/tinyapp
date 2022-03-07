@@ -18,12 +18,12 @@
         </div>
       </form>
     <% } else{ %>
-    <form method="GET" action="/login" class="form-inline">
-      <button type="submit" style="background-color:transparent; border-color:rgb(4, 48, 48); color:darkslategray" class="btn btn-primary">Login</button>
-    </form>
-    <form method="GET" action="/register" class="form-inline">
-      <button type="submit" style="background-color:transparent; border-color:rgb(4, 48, 48); color:darkslategray; margin-left: 10px" class="btn btn-primary">Register</button>
-    </form>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/login" >Login</a>
+          <a class="nav-item nav-link" href="/register" >Register</a>
+        </div>
+      </div>
     <% } %>
   </nav>
 </header>
