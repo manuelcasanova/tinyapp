@@ -87,21 +87,6 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-/* //Trying: Only registered users can shorten urls
-app.get("/urls/new", (req, res) => {
-  for (const user in users) {
-    if (user) {
-      let templateVars = {
-        user: users[req.cookies["userID"]]
-      };
-      res.render("urls_new", templateVars);
-    } else {
-      res.redirect(`/login`);
-    }
-  }
-});
-*/
-
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
@@ -111,18 +96,22 @@ app.get("/urls", (req, res) => {
 }); //
 
 app.get("/urls/:shortURL", (req, res) => {
+  // console.log("-------------", urlDatabase);
+  // console.log("------------", req.params.shortURL);
+  if (!urlDatabase[req.params.shortURL]) { //The way I was trying before wouldn't work because it was always looking for a non exisitin shortURL in the Database so, OF COURSE, was always returning UNDEFINED!
+    res.send("<div>This sort url does not exist in your database</div>")
+  } 
   let templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL, /*--------------HERE----------*/
-    user: users[req.cookies["userID"]]
+    longURL: urlDatabase[req.params.shortURL].longURL,
+    user: users[req.cookies["userID"]],
   };
   res.render("urls_show", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL; /*--------------HERE----------*/
-  //console.log("------->", longURL);
-  res.redirect(longURL);
+  const longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL);
 });
 //Requests to the endpoint "/u/:shortURL" will redirect to its longURL
 
@@ -206,29 +195,6 @@ app.post("/register", (req, res) => {
       res.redirect("/urls");
   };
 });
-
-// app.post("/register", (req, res) => {
-//   const email = req.body.email;
-//   const password = req.body.password;
-//   const newUserID = generateRandomString();
-
-//   if (email === "" || password === "") {
-//     res.send(400, "Fields email and password cannot be empty")
-//   } //email or password empty --> error
-//   else if (emailRepeated(email)) {
-//       res.send(400, "This email has already been used to create an account")   //email already exists --> error 
-//   } else {
-//     users[newUserID] = {
-//       id: newUserID,
-//       email: email,
-//       password: password
-//     };
-//   }
-
-//   //console.log(users); //To confirm that new users have been added
-//   res.cookie("userID", newUserID);
-//   res.redirect(`/urls/`);
-// });
 
 app.get("/login", (req, res) => {
   let templateVars = {
