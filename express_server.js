@@ -34,6 +34,16 @@ function emailRepeated(email) {
   return false
 } 
 
+function urlsForUser(id) { //Function returns the URLS where the userID is equal to the id of the logged-in user
+  const userURLS = {};
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+      userURLS[key] = urlDatabase[key];
+    }
+  }
+  return userURLS;
+}
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
