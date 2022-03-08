@@ -99,7 +99,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls", (req, res) => {
     let templateVars = {
-      urls: urlDatabase,
+      urls: urlsForUser(req.cookies["userID"]), //onle shows urls with same id (creator, loggedin)
       user: users[req.cookies["userID"]]
     };
     if (!req.cookies["userID"]) {   //If there's not logged in user
@@ -118,6 +118,7 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
+   urlUserID: urlDatabase[req.params.shortURL].userID, //Used in urls_show.ejs 
     user: users[req.cookies["userID"]],
   };
   res.render("urls_show", templateVars);
