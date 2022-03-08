@@ -148,18 +148,32 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];    
-  res.redirect("/urls");
+  const userID = req.cookies["userID"];
+  const userUrls = urlsForUser(userID);
+  if (Object.keys(userUrls).includes(req.params.shortURL)) {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  } else {
+    res.send("Only the creator can delete a short URL");
+  }
 });
 //Deletes :shortURL in database and redirects to the urls page.
+//Updated so it can only be deleted by creator
 
 app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id;
-  urlDatabase[shortURL].longURL = req.body.newURL; //Changed left side so it could access de longURL. When I was editing a shortUrl the new longURL wouldn't show until I did this!
-  res.redirect('/urls');
+  const userID = req.cookies["userID"];
+  const userUrls = urlsForUser(userID);
+  if (Object.keys(userUrls).includes(req.params.id)) {
+    const shortURL = req.params.id;
+    urlDatabase[shortURL].longURL = req.body.newURL;
+    res.redirect('/urls');
+  } else {
+    res.send("Only the creator can edit a short URL");
+  }
 });
 //Updates a URL resource POST /urls/:id
+//Updated so it can only be edited by creator
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
