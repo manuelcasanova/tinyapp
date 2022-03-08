@@ -88,12 +88,16 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["userID"]]
-  };
-  res.render("urls_index", templateVars);
-}); //
+    let templateVars = {
+      urls: urlDatabase,
+      user: users[req.cookies["userID"]]
+    };
+    if (!req.cookies["userID"]) {   //If there's not logged in user
+      res.send("User needs to be logged in to see the shortened URLS") //send this html message
+    } else {
+      res.render("urls_index", templateVars); //otherwise show the urls page
+    }
+}); 
 
 app.get("/urls/:shortURL", (req, res) => {
   // console.log("-------------", urlDatabase);
