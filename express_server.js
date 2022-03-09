@@ -1,9 +1,11 @@
 const express = require("express");
-const app = express();
-const PORT = 8080; // default port 8080
 const cookieParser = require("cookie-parser");
-
 const bodyParser = require("body-parser");
+const bcrypt = require('bcryptjs');
+
+const PORT = 8080; // default port 8080
+const app = express();
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -36,9 +38,9 @@ function emailRepeated(email) {
 
 function urlsForUser(id) { //Function returns the URLS where the userID is equal to the id of the logged-in user
   const userURLS = {};
-  for (let key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      userURLS[key] = urlDatabase[key];
+  for (let k in urlDatabase) {
+    if (urlDatabase[k].userID === id) {
+      userURLS[k] = urlDatabase[k];
     }
   }
   return userURLS;
@@ -70,12 +72,12 @@ const users = {
   }
 }
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
+});
+
+app.get("/", (req, res) => {
+  res.send("Hello!");
 });
 
 app.get("/urls.json", (req, res) => {
@@ -178,12 +180,13 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   if(!emailRepeated(email)) {
     res.status(403).send("This is not a valid email address")
   } else {
     const userID = emailRepeated(email);
-    if (users[userID].password !== password) { //to access the password of each user in the object I can reuse the function emailRepeated(email)
+    if (!bcrypt.compareSync(password, users[userID].password)) { //to access the password of each user in the object I can reuse the function emailRepeated(email)
       res.status(403).send("Wrong password")
     } else {
       res.cookie('userID', userID);
@@ -208,7 +211,9 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = req.body.password; 
+  //const password = "password1"; This would have been hard coding. Instructions on compass were not clear for me.
+  
   if (email === " " || password === " ") { //if !email || !password
     res.status(400).send("Fields email and password cannot be empty");
   } else if (emailRepeated(email)) {
@@ -218,8 +223,9 @@ app.post("/register", (req, res) => {
     users[newUserID] = {
       id: newUserID,
       email: email,
-      password: password
+      password: bcrypt.hashSync(password, 10)
     };
+    //console.log(users[newUserID].password); To see the hash password
       res.cookie('userID', newUserID);
       res.redirect("/urls");
   };
