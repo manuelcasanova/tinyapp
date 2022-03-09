@@ -4,7 +4,7 @@ const cookieSession = require("cookie-session");
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 
-const { getUserByEmail } = require("./helpers");
+const { getUserByEmail, generateRandomString, emailExists, urlsForUser } = require("./helpers");
 
 const PORT = 8080; // default port 8080
 const app = express();
@@ -16,51 +16,6 @@ app.use(cookieSession({ //cookie-session readme.md API
   keys: ["casanova"],
   maxAge: 24 * 60 * 60 * 1000 //24 hours
 }));
-
-//FUNCTIONS
-
-function generateRandomString() {
-  let result = '';
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const length = 6;
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-    //Math.random --> 0...1  times (length of characters) charAt --> gets the character of the string
-  }
-  return result;
-}
-
-// function emailRepeated(email) {
-//   for (const user in users) {
-//     if (users[user].email === email) {
-//       return users[user].id
-//     }
-//   }
-//   return false
-// } 
-
-//Refactor helper functions. Previously function emailRepeated(email)
-
-
-
-function emailExists(email, userDatabase) { //Checks if the email corresponds to a user in the database
-  for (const user in userDatabase) {
-    if (userDatabase[user].email === email) {
-      return true;
-    }
-  }
-  return false;
-};
-
-function urlsForUser(id) { //Function returns the URLS where the userID is equal to the id of the logged-in user
-  const userURLS = {};
-  for (let k in urlDatabase) {
-    if (urlDatabase[k].userID === id) {
-    userURLS[k] = urlDatabase[k];
-    }
-  }
-  return userURLS;
-}
 
 app.set("view engine", "ejs");
 
@@ -121,7 +76,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls", (req, res) => {
     let templateVars = {
-      urls: urlsForUser(req.session.user_id), //onle shows urls with same id (creator, loggedin)
+      urls: urlsForUser(req.session.user_id, urlDatabase), //onle shows urls with same id (creator, loggedin)
       user: users[req.session.user_id]
     };
     if (!req.session.user_id) {   //If there's not logged in user
@@ -187,7 +142,7 @@ app.post("/urls", (req, res) => {
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
-  const userUrls = urlsForUser(userID);
+  const userUrls = urlsForUser(userID, urlDatabase);
   if (Object.keys(userUrls).includes(req.params.shortURL)) {
     const shortURL = req.params.shortURL;
     delete urlDatabase[shortURL];
@@ -201,7 +156,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
-  const userUrls = urlsForUser(userID);
+  const userUrls = urlsForUser(userID, urlDatabase);
   if (Object.keys(userUrls).includes(req.params.id)) {
     const shortURL = req.params.id;
     urlDatabase[shortURL].longURL = req.body.newURL;
