@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 
@@ -8,6 +9,11 @@ const app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use(cookieSession({ //cookie-session readme.md API
+  name: 'session',
+  keys: ["casanova"],
+  maxAge: 24 * 60 * 60 * 1000 //24 hours
+}));
 
 // function generateRandomString(length) {
 //   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
@@ -90,9 +96,9 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user: users[req.cookies["userID"]]
+    user: users[req.session.user_id] //To read a value in cookies with cookie-session req.session.user_id
   };
-  if (!req.cookies["userID"]) { //If there's no logged in user
+  if (!req.session.user_id) { //If there's no logged in user
     res.redirect("/login"); //redirect to login page
   } else {
     res.render("urls_new", templateVars);
@@ -101,10 +107,10 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls", (req, res) => {
     let templateVars = {
-      urls: urlsForUser(req.cookies["userID"]), //onle shows urls with same id (creator, loggedin)
-      user: users[req.cookies["userID"]]
+      urls: urlsForUser(req.session.user_id), //onle shows urls with same id (creator, loggedin)
+      user: users[req.session.user_id]
     };
-    if (!req.cookies["userID"]) {   //If there's not logged in user
+    if (!req.session.user_id) {   //If there's not logged in user
       res.send("User needs to be logged in to see the shortened URLS") //send this html message
     } else {
       res.render("urls_index", templateVars); //otherwise show the urls page
@@ -120,8 +126,8 @@ app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-   urlUserID: urlDatabase[req.params.shortURL].userID, //Used in urls_show.ejs 
-    user: users[req.cookies["userID"]],
+    urlUserID: urlDatabase[req.params.shortURL].userID, //Used in urls_show.ejs 
+    user: users[req.session.user_id],
   };
   res.render("urls_show", templateVars);
 });
@@ -136,7 +142,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); //We'll use this constant no only below but also in the redirect
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies["userID"] //Modified so it now adds to the object the userID connected to the new shortURL created
+    userID: req.session.user_id //Modified so it now adds to the object the userID connected to the new shortURL created
   }
     
     ; //Adds the short and long urls to the variable "urlDatabase"
@@ -150,7 +156,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const userID = req.cookies["userID"];
+  const userID = req.session.user_id;
   const userUrls = urlsForUser(userID);
   if (Object.keys(userUrls).includes(req.params.shortURL)) {
     const shortURL = req.params.shortURL;
@@ -164,7 +170,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 //Updated so it can only be deleted by creator
 
 app.post("/urls/:id", (req, res) => {
-  const userID = req.cookies["userID"];
+  const userID = req.session.user_id;
   const userUrls = urlsForUser(userID);
   if (Object.keys(userUrls).includes(req.params.id)) {
     const shortURL = req.params.id;
@@ -189,7 +195,7 @@ app.post("/login", (req, res) => {
     if (!bcrypt.compareSync(password, users[userID].password)) { //to access the password of each user in the object I can reuse the function emailRepeated(email)
       res.status(403).send("Wrong password")
     } else {
-      res.cookie('userID', userID);
+      req.session.user_id = userID; //To set the user_id key on a session write req.session.user_id = "some value";
       res.redirect("/urls");
     }
   }
@@ -198,13 +204,13 @@ app.post("/login", (req, res) => {
 
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("userID");
+  req.session = null; //To destroy a session (readme.md) instead of cookie parser res.clearCookie("userID");
   res.redirect('/urls');
 });
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    user: users[req.cookies["userID"]]
+    user: users[req.session.user_id]
   };
   res.render("register", templateVars)
 });
@@ -226,14 +232,14 @@ app.post("/register", (req, res) => {
       password: bcrypt.hashSync(password, 10)
     };
     //console.log(users[newUserID].password); To see the hash password
-      res.cookie('userID', newUserID);
+      req.session.user_id = newUserID //To set the user_id key on a session write req.session.user_id = "some value";
       res.redirect("/urls");
   };
 });
 
 app.get("/login", (req, res) => {
   let templateVars = {
-    user: users[req.cookies["userID"]]
+    user: users[req.session.user_id]
   };
   res.render("login", templateVars)
 });
