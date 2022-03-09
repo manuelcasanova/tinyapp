@@ -28,14 +28,33 @@ function generateRandomString() {
   return result;
 }
 
-function emailRepeated(email) {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user].id
+// function emailRepeated(email) {
+//   for (const user in users) {
+//     if (users[user].email === email) {
+//       return users[user].id
+//     }
+//   }
+//   return false
+// } 
+
+//Refactor helper functions. Previously function emailRepeated(email)
+
+function getUserByEmail(email, userDatabase) { //Returns the ID for the user with them given email address
+  for (const user in userDatabase) {
+    if (userDatabase[user].email === email) {
+      return userDatabase[user].id;
     }
   }
-  return false
-} 
+};
+
+function emailExists(email, userDatabase) { //Checks if the email corresponds to a user in the database
+  for (const user in userDatabase) {
+    if (userDatabase[user].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
 
 function urlsForUser(id) { //Function returns the URLS where the userID is equal to the id of the logged-in user
   const userURLS = {};
@@ -203,10 +222,10 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  if(!emailRepeated(email)) {
+  if(!emailExists(email, users)) {
     res.status(403).send("This is not a valid email address")
   } else {
-    const userID = emailRepeated(email);
+    const userID = getUserByEmail(email, users);
     if (!bcrypt.compareSync(password, users[userID].password)) { //to access the password of each user in the object I can reuse the function emailRepeated(email)
       res.status(403).send("Wrong password")
     } else {
@@ -231,7 +250,7 @@ app.post("/register", (req, res) => {
   
   if (email === " " || password === " ") { //if !email || !password
     res.status(400).send("Fields email and password cannot be empty");
-  } else if (emailRepeated(email)) {
+  } else if (emailExists(email, users)) {
     res.status(400).send("This email has already been used to create an account");
   } else {
     const newUserID = generateRandomString();
