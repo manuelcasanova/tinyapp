@@ -15,12 +15,7 @@ app.use(cookieSession({ //cookie-session readme.md API
   maxAge: 24 * 60 * 60 * 1000 //24 hours
 }));
 
-// function generateRandomString(length) {
-//   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-//   for (var i = ''; i.length < length; i += characters.charAt(Math.random()*62));
-//   //Math.random --> 0...1 * 62 (length of characters) charAt --> gets the character of the string
-//   return i;
-// }
+//FUNCTIONS
 
 function generateRandomString() {
   let result = '';
@@ -46,13 +41,15 @@ function urlsForUser(id) { //Function returns the URLS where the userID is equal
   const userURLS = {};
   for (let k in urlDatabase) {
     if (urlDatabase[k].userID === id) {
-      userURLS[k] = urlDatabase[k];
+    userURLS[k] = urlDatabase[k];
     }
   }
   return userURLS;
 }
 
 app.set("view engine", "ejs");
+
+//GLOBAL CONSTANTS
 
 const urlDatabase = {
   b6UTxQ: {
@@ -81,6 +78,8 @@ const users = {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+//APP.GET
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -137,6 +136,22 @@ app.get("/u/:shortURL", (req, res) => {
     res.redirect(longURL);
 });
 //Requests to the endpoint "/u/:shortURL" will redirect to its longURL
+
+app.get("/register", (req, res) => {
+  let templateVars = {
+    user: users[req.session.user_id]
+  };
+  res.render("register", templateVars)
+});
+
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user: users[req.session.user_id]
+  };
+  res.render("login", templateVars)
+});
+
+//APP.POST
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString(); //We'll use this constant no only below but also in the redirect
@@ -208,12 +223,6 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
-app.get("/register", (req, res) => {
-  let templateVars = {
-    user: users[req.session.user_id]
-  };
-  res.render("register", templateVars)
-});
 
 app.post("/register", (req, res) => {
   const email = req.body.email;
@@ -237,9 +246,4 @@ app.post("/register", (req, res) => {
   };
 });
 
-app.get("/login", (req, res) => {
-  let templateVars = {
-    user: users[req.session.user_id]
-  };
-  res.render("login", templateVars)
-});
+
