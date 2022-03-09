@@ -4,6 +4,8 @@ const cookieSession = require("cookie-session");
 const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 
+const { getUserByEmail } = require("./helpers");
+
 const PORT = 8080; // default port 8080
 const app = express();
 
@@ -39,13 +41,7 @@ function generateRandomString() {
 
 //Refactor helper functions. Previously function emailRepeated(email)
 
-function getUserByEmail(email, userDatabase) { //Returns the ID for the user with them given email address
-  for (const user in userDatabase) {
-    if (userDatabase[user].email === email) {
-      return userDatabase[user].id;
-    }
-  }
-};
+
 
 function emailExists(email, userDatabase) { //Checks if the email corresponds to a user in the database
   for (const user in userDatabase) {
