@@ -19,6 +19,12 @@ describe('getUserByEmail', function () {
     const user = getUserByEmail('user@example.com', testUsers)
     const expectedUserID = 'userRandomID';
     assert.equal(user, expectedUserID);
+  });
+
+  it('should return undefined if we pass an email that is not in our users database', function() {
+    const user = getUserByEmail('nonExistantUser@example.com', testUsers)
+    const expectedUserID = 'userRandomID';
+    assert.equal(user, undefined);
 
   });
 });
