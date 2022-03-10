@@ -1,4 +1,4 @@
-function getUserByEmail(email, userDatabase) { //Returns the ID for the user with them given email address
+const getUserByEmail = function(email, userDatabase) { //Returns the ID for the user with them given email address
   for (const user in userDatabase) {
     if (userDatabase[user].email === email) {
       return userDatabase[user].id;
@@ -6,7 +6,7 @@ function getUserByEmail(email, userDatabase) { //Returns the ID for the user wit
   }
 };
 
-function generateRandomString() {
+const generateRandomString = function() {
   let result = '';
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const length = 6;
@@ -15,9 +15,9 @@ function generateRandomString() {
     //Math.random --> 0...1  times (length of characters) charAt --> gets the character of the string
   }
   return result;
-}
+};
 
-function emailExists(email, userDatabase) { //Checks if the email corresponds to a user in the database
+const emailExists = function(email, userDatabase) { //Checks if the email corresponds to a user in the database
   for (const user in userDatabase) {
     if (userDatabase[user].email === email) {
       return true;
@@ -26,15 +26,15 @@ function emailExists(email, userDatabase) { //Checks if the email corresponds to
   return false;
 };
 
-function urlsForUser(id, urlDatabase) { //Function returns the URLS where the userID is equal to the id of the logged-in user
+const urlsForUser = function(id, urlDatabase) { //Function returns the URLS where the userID is equal to the id of the logged-in user
   const userURLS = {};
   for (let k in urlDatabase) {
     if (urlDatabase[k].userID === id) {
-    userURLS[k] = urlDatabase[k];
+      userURLS[k] = urlDatabase[k];
     }
   }
   return userURLS;
-}
+};
 
 module.exports = {
   getUserByEmail,
