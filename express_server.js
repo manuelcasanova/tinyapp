@@ -19,7 +19,7 @@ app.use(cookieSession({ //This section is explained in the cookie-session readme
 
 app.set("view engine", "ejs");
 
-//GLOBAL CONSTANTS
+//GLOBAL CONSTANTS (DATABASES. IN THE REAL WORLD THEY WOULD NOT BE IN THIS CODE)
 
 const urlDatabase = {
   b6UTxQ: {
@@ -58,16 +58,9 @@ app.get("/", (req, res) => { //http://localhost:8080 renders de login page
   res.render("login", templateVars);
 });
 
-app.get("/urls.json", (req, res) => {
+app.get("/urls.json", (req, res) => {//http://localhost:8080/urls.json we see a JSON string representing the entire urlDatabase object
   res.json(urlDatabase);
 });
-
-// app.get("/error", (req, res) => {
-//   let templateVars = {
-//     user: users[req.session.user_id]
-//   };
-//   res.render("error", templateVars);
-// });
 
 app.get("/register", (req, res) => {
   let templateVars = {
@@ -89,12 +82,19 @@ app.get("/urls", (req, res) => {
     user: users[req.session.user_id]
   };
   if (!req.session.user_id) {   //If there's not logged in user
-    res.send("User needs to be logged in to see the shortened URLS"); //send this html message
+    let templateVars = {
+      "error": {
+        "errorMessage": "User needs to be logged in to see the shortened URLS"
+      },
+      "user": users[req.session.user_id]
+    };
+    res.status(400).render("error", templateVars);
   } else {
     res.render("urls_index", templateVars); //otherwise show the urls page
   }
 });
 
+//Submission form (URLs to be shortened)
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     user: users[req.session.user_id] //To read a value in cookies with cookie-session write req.session.user_id
@@ -108,7 +108,13 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
-    res.send("This sort url does not exist in your database");
+    let templateVars = {
+      "error": {
+        "errorMessage": "This sort url does not exist in your database"
+      },
+      "user": users[req.session.user_id]
+    };
+    res.status(400).render("error", templateVars);
   }
   let templateVars = {
     shortURL: req.params.shortURL,
@@ -119,33 +125,50 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+//Requests to the endpoint "/u/:shortURL" will redirect to its longURL
+// app.get("/u/:shortURL", (req, res) => {
+//   const longURL = urlDatabase[req.params.shortURL].longURL;
+  
+//   res.redirect(longURL);
+// });
+
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
+  if (longURL.slice(0,4) === "http") {
+    res.redirect(longURL); 
+  } else {
+    res.redirect(`https://${longURL}`)
+  }
+  //console.log(longURL.slice(0,4));
+  //console.log(longURL);
+  
 });
-//Requests to the endpoint "/u/:shortURL" will redirect to its longURL
 
 
 //APP.POST
 
-
+//Handles the registration form data
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  //const password = "password1"; This would have been hard coding. Instructions on compass were not clear for me.
- 
   
   if (email === "" || password === "") {
-    //res.status(400).send("Fields email or password cannot be empty");
     let templateVars = {
       "error": {
-        "msg": "Fields email or password cannot be empty"
+        "errorMessage": "Fields email or password cannot be empty"
       },
       "user": users[req.session.user_id]
     };
     res.status(400).render("error", templateVars);
+
   } else if (emailExists(email, users)) {
-    res.status(400).send("This email has already been used to create an account");
+    let templateVars = {
+      "error": {
+        "errorMessage": "This email has already been used to create an account"
+      },
+      "user": users[req.session.user_id]
+    };
+    res.status(400).render("error", templateVars);
   } else {
     const newUserID = generateRandomString();
     users[newUserID] = {
@@ -163,11 +186,23 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
 
   if (!emailExists(email, users)) {
-    res.status(403).send("This is not a valid email address");
+    let templateVars = {
+      "error": {
+        "errorMessage": "This is not a valid email address or you do not have an account"
+      },
+      "user": users[req.session.user_id]
+    };
+    res.status(403).render("error", templateVars);
   } else {
     const userID = getUserByEmail(email, users);
     if (!bcrypt.compareSync(password, users[userID].password)) {
-      res.status(403).send("Wrong password");
+      let templateVars = {
+        "error": {
+          "errorMessage": "Wrong password"
+        },
+        "user": users[req.session.user_id]
+      };
+      res.status(403).render("error", templateVars);
     } else {
       req.session.user_id = userID; //To set the user_id key on a session write req.session.user_id = "some value";
       res.redirect("/urls");
@@ -175,7 +210,13 @@ app.post("/login", (req, res) => {
   }
 });
 
+//Receives the form submission
 app.post("/urls", (req, res) => {
+const user = users[req.session.user_id]
+  if (!user) {
+    return res.status(403).send("You need to be logged in to add a new short URL"); //To make sure it is not possible to add a shortURL using curl
+  } 
+
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
@@ -185,9 +226,11 @@ app.post("/urls", (req, res) => {
   console.log(urlDatabase);  // Log the POST request body to the console
   
   res.redirect(`/urls/${shortURL}`); //Redirects to /urls/:shortURL, where shortURL is the random string we generated
-  //Note that this won't work if we only require de site without http:// According to mentors it's a limitation of this tinyApp
+  //Note that this won't work if we only require de site without http:// According to mentors it's a limitation of this tinyApp.
 });
 
+//Deletes :shortURL in database and redirects to the urls page.
+//Updated so it can only be deleted by creator
 app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
   const userUrls = urlsForUser(userID, urlDatabase);
@@ -196,12 +239,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[shortURL];
     res.redirect('/urls');
   } else {
-    res.send("Only the owner can delete a short URL");
+    res.send("Only the owner can delete!"); //Since this is only accesible through -curl I decided to now send to the error.ejs template
   }
 });
-//Deletes :shortURL in database and redirects to the urls page.
-//Updated so it can only be deleted by creator
 
+//Updates a URL resource POST /urls/:id
+//Updated so it can only be edited by creator
 app.post("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   const userUrls = urlsForUser(userID, urlDatabase);
@@ -210,11 +253,15 @@ app.post("/urls/:id", (req, res) => {
     urlDatabase[shortURL].longURL = req.body.newURL;
     res.redirect('/urls');
   } else {
-    res.send("Only the owner can edit a short URL");
+    let templateVars = {
+      "error": {
+        "errorMessage": "Only the owner can edit a short URL"
+      },
+      "user": users[req.session.user_id]
+    };
+    res.status(403).render("error", templateVars);
   }
 });
-//Updates a URL resource POST /urls/:id
-//Updated so it can only be edited by creator
 
 app.post("/logout", (req, res) => {
   req.session = null; //To destroy a session (readme.md) instead of `cookie parser res.clearCookie("userID");`
