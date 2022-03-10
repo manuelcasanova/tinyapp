@@ -14,16 +14,15 @@ const testUsers = {
   }
 };
 
-describe('getUserByEmail', function () {
+describe('getUserByEmail', function() {
   it('should return a user with a valid email', function() {
-    const user = getUserByEmail('user@example.com', testUsers)
+    const user = getUserByEmail('user@example.com', testUsers);
     const expectedUserID = 'userRandomID';
     assert.equal(user, expectedUserID);
   });
 
   it('should return undefined if we pass an email that is not in our users database', function() {
-    const user = getUserByEmail('nonExistantUser@example.com', testUsers)
-    const expectedUserID = 'userRandomID';
+    const user = getUserByEmail('nonExistantUser@example.com', testUsers);
     assert.equal(user, undefined);
 
   });
