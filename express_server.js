@@ -127,10 +127,10 @@ app.get("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (longURL.slice(0,4) === "http") { 
-    res.redirect(longURL); 
+  if (longURL.slice(0,4) === "http") {
+    res.redirect(longURL);
   } else {
-    res.redirect(`https://${longURL}`)//Short Url will redirect to long URL even if user does not write https://
+    res.redirect(`https://${longURL}`);//Short Url will redirect to long URL even if user does not write https://
   }
 });
 
@@ -202,10 +202,10 @@ app.post("/login", (req, res) => {
 
 //Receives the form submission
 app.post("/urls", (req, res) => {
-const user = users[req.session.user_id]
+  const user = users[req.session.user_id];
   if (!user) {
     return res.status(403).send("You need to be logged in to add a new short URL"); //To make sure it is not possible to add a shortURL without being logged in (even using curl)
-  } 
+  }
 
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
