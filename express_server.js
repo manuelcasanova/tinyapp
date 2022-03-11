@@ -51,7 +51,7 @@ app.listen(PORT, () => {
 
 //APP.GET
 
-app.get("/", (req, res) => { //http://localhost:8080 renders de login page
+app.get("/", (req, res) => { //http://localhost:8080 renders the login page
   let templateVars = {
     user: users[req.session.user_id]
   };
@@ -125,23 +125,13 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//Requests to the endpoint "/u/:shortURL" will redirect to its longURL
-// app.get("/u/:shortURL", (req, res) => {
-//   const longURL = urlDatabase[req.params.shortURL].longURL;
-  
-//   res.redirect(longURL);
-// });
-
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
-  if (longURL.slice(0,4) === "http") {
+  if (longURL.slice(0,4) === "http") { 
     res.redirect(longURL); 
   } else {
-    res.redirect(`https://${longURL}`)
+    res.redirect(`https://${longURL}`)//Short Url will redirect to long URL even if user does not write https://
   }
-  //console.log(longURL.slice(0,4));
-  //console.log(longURL);
-  
 });
 
 
@@ -214,7 +204,7 @@ app.post("/login", (req, res) => {
 app.post("/urls", (req, res) => {
 const user = users[req.session.user_id]
   if (!user) {
-    return res.status(403).send("You need to be logged in to add a new short URL"); //To make sure it is not possible to add a shortURL using curl
+    return res.status(403).send("You need to be logged in to add a new short URL"); //To make sure it is not possible to add a shortURL without being logged in (even using curl)
   } 
 
   const shortURL = generateRandomString();
@@ -226,7 +216,6 @@ const user = users[req.session.user_id]
   console.log(urlDatabase);  // Log the POST request body to the console
   
   res.redirect(`/urls/${shortURL}`); //Redirects to /urls/:shortURL, where shortURL is the random string we generated
-  //Note that this won't work if we only require de site without http:// According to mentors it's a limitation of this tinyApp.
 });
 
 //Deletes :shortURL in database and redirects to the urls page.
@@ -239,7 +228,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[shortURL];
     res.redirect('/urls');
   } else {
-    res.send("Only the owner can delete!"); //Since this is only accesible through -curl I decided to now send to the error.ejs template
+    res.send("Only the owner can delete!"); //Since this is only accesible through -curl I decided to not send to the error.ejs template
   }
 });
 
